@@ -20,9 +20,40 @@ def generate_vars_at_step(s: int) -> list:
 
     for i in range(BOARD_I):
         for j in range(BOARD_J):
-            b_vars[f'x_{i}_{j}_{s}'] = Bool(f'x_{i + 1}_{j + 1}_{s}')
-            b_vars[f'o_{i}_{j}_{s}'] = Bool(f'o_{i + 1}_{j + 1}_{s}')
+            b_vars[f'x_{i}_{j}_{s}'] = Bool(f'x_{i}_{j}_{s}')
+            b_vars[f'o_{i}_{j}_{s}'] = Bool(f'o_{i}_{j}_{s}')
     return b_vars
+
+def generate_move_at_step(player, step, bvars):
+    '''
+        bvars containts the vars for this step and the next, indexed by 0 and 1.
+    '''
+    global BOARD_I
+    global BOARD_J
+    
+    const = []
+
+    for i in range(BOARD_I):
+        for j in range(BOARD_J):
+            cond = []
+            for k in range(BOARD_I):
+                for l in range(BOARD_J):
+                    if i != k or j != l:
+                        cond.append(bvars[0][f'x_{k}_{l}_{step}'] == bvars[1][f'x_{k}_{l}_{step + 1}'])
+                        cond.append(bvars[0][f'o_{k}_{l}_{step}'] == bvars[1][f'o_{k}_{l}_{step + 1}'])
+            
+            cond.append(Not(bvars[0][f'x_{i}_{j}_{step}']))
+            cond.append(Not(bvars[0][f'o_{i}_{j}_{step}']))
+            if player == 'x':
+                cond.append(Not(bvars[1][f'o_{i}_{j}_{step + 1}']))
+                cond.append(bvars[1][f'x_{i}_{j}_{step + 1}'])
+            else:
+                cond.append(Not(bvars[1][f'x_{i}_{j}_{step + 1}']))
+                cond.append(bvars[1][f'o_{i}_{j}_{step + 1}'])
+            const.append(And(cond))
+
+    return Or(const)
+
 
 
 def generate_wining_cond(final_step_vars: list) -> BoolRef:
@@ -37,7 +68,7 @@ def generate_wining_cond(final_step_vars: list) -> BoolRef:
         And([final_step_vars[f'x_{j}_{i}_{STEPS - 1}'] for i in range(BOARD_I)]) for j in range(BOARD_J)
     ])
     mdiag = And([final_step_vars[f'x_{i}_{i}_{STEPS - 1}'] for i in range(BOARD_I)])
-    diag = And([final_step_vars[f'x_{i}_{BOARD_J - i}_{STEPS - 1}'] for i in range(BOARD_I)])
+    diag = And([final_step_vars[f'x_{i}_{BOARD_J - 1 - i}_{STEPS - 1}'] for i in range(BOARD_I)])
     return Or(row, col, mdiag, diag)
 
 
