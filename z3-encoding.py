@@ -82,3 +82,17 @@ init_cond = Not(Or(list(generate_vars_at_step(0).values())))
 
 # Wining condition for X
 x_wins = generate_wining_cond(generate_vars_at_step(STEPS - 1))
+
+# Connecting all the pieces together
+enc = None
+for k in range(STEPS - 1, -1, -1):
+    if k == 9:
+        enc = Exists(list(all_vars[k].values()), And(generate_move_at_step('x', k-1, all_vars[(k - 1):(k + 1)]), generate_wining_cond(all_vars[k])))
+    elif k != 0:
+        if k % 2 == 0:
+            # Universal Quantifier
+            enc = ForAll(list(all_vars[k].values()), Implies(generate_move_at_step('o', k-1, all_vars[(k - 1):(k + 1)]), enc))
+        else:
+            enc = Exists(list(all_vars[k].values()), And(generate_move_at_step('x', k-1, all_vars[(k - 1):(k + 1)]), enc))
+    else:
+        enc = Exists(list(all_vars[k].values()), And(init_cond, enc))
