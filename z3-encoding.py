@@ -65,7 +65,7 @@ def generate_wining_cond(final_step_vars: list) -> BoolRef:
         And([final_step_vars[f'x_{i}_{j}_{STEPS - 1}'] for j in range(BOARD_J)]) for i in range(BOARD_I)
     ])
     col = Or([
-        And([final_step_vars[f'x_{j}_{i}_{STEPS - 1}'] for i in range(BOARD_I)]) for j in range(BOARD_J)
+        And([final_step_vars[f'x_{i}_{j}_{STEPS - 1}'] for i in range(BOARD_I)]) for j in range(BOARD_J)
     ])
     mdiag = And([final_step_vars[f'x_{i}_{i}_{STEPS - 1}'] for i in range(BOARD_I)])
     diag = And([final_step_vars[f'x_{i}_{BOARD_J - 1 - i}_{STEPS - 1}'] for i in range(BOARD_I)])
