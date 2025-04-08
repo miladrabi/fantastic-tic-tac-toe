@@ -132,7 +132,7 @@ def check_wining_strategy(board, step):
 
     if step == 8:
         # Final Step, No need to use a quantifier
-        enc = And(enc, generate_wining_cond(all_vars[step + 1]))
+        enc = And(enc, generate_wining_cond(all_vars[step + 1], step + 1))
     else:
         # We are going to build the constraint for the next move of the opponent
         enc_prime = None
@@ -186,9 +186,9 @@ for s in range(STEPS):
 
 
 board = [
-    ['x', ' ', ' '],
-    [' ', 'o', ' '],
-    ['o', ' ', 'x']
+    ['x', 'o', ' '],
+    [' ', 'x', ' '],
+    [' ', ' ', 'o']
 ]
 
 enc = check_wining_strategy(board, 4)
@@ -198,6 +198,7 @@ s = Solver()
 s.add(enc)
 
 res = s.check()
+print(res)
 
 model = s.model()
 

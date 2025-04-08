@@ -44,6 +44,6 @@ while(True):
     i, j = [int(v) for v in move]
     board[i - 1][j - 1] = player
     state += 1
-    if state > 9:
+    if state >= 9:
         print('End of the game!')
         break
