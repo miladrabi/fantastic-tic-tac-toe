@@ -178,27 +178,28 @@ def get_move_from_model(model):
     assert len(moves) == 1, 'More than One valid move found - This might be an error!'
     return moves
 
+if __name__ == '__main__':
 
-all_vars = []
-# TODO: We don't need all variables at this state. Delete those that are not used.
-for s in range(STEPS):
-    all_vars.append(generate_vars_at_step(s))
+    all_vars = []
+    # TODO: We don't need all variables at this state. Delete those that are not used.
+    for s in range(STEPS):
+        all_vars.append(generate_vars_at_step(s))
 
 
-board = [
-    ['x', ' ', ' '],
-    [' ', 'o', ' '],
-    ['o', ' ', 'x']
-]
+    board = [
+        ['x', ' ', ' '],
+        [' ', 'o', ' '],
+        ['o', ' ', 'x']
+    ]
 
-enc = check_wining_strategy(board, 4)
+    enc = check_wining_strategy(board, 4)
 
-s = Solver()
+    s = Solver()
 
-s.add(enc)
+    s.add(enc)
 
-res = s.check()
+    res = s.check()
 
-model = s.model()
+    model = s.model()
 
-print(get_move_from_model(model))
+    print(get_move_from_model(model))
