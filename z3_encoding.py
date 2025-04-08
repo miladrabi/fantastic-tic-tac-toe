@@ -59,28 +59,28 @@ def generate_move_at_step(player, step, bvars):
 
 
 
-def generate_wining_cond(final_step_vars: list) -> BoolRef:
+# step must be one lower
+def generate_wining_cond(step_vars: list, step: int) -> BoolRef:
     global BOARD_I
     global BOARD_J
-    global STEPS
 
     row_x = Or([
-        And([final_step_vars[f'x_{i}_{j}_{STEPS - 1}'] for j in range(BOARD_J)]) for i in range(BOARD_I)
+        And([step_vars[f'x_{i}_{j}_{step}'] for j in range(BOARD_J)]) for i in range(BOARD_I)
     ])
     col_x = Or([
-        And([final_step_vars[f'x_{i}_{j}_{STEPS - 1}'] for i in range(BOARD_I)]) for j in range(BOARD_J)
+        And([step_vars[f'x_{i}_{j}_{step}'] for i in range(BOARD_I)]) for j in range(BOARD_J)
     ])
-    mdiag_x = And([final_step_vars[f'x_{i}_{i}_{STEPS - 1}'] for i in range(BOARD_I)])
-    diag_x = And([final_step_vars[f'x_{i}_{BOARD_J - 1 - i}_{STEPS - 1}'] for i in range(BOARD_I)])
+    mdiag_x = And([step_vars[f'x_{i}_{i}_{step}'] for i in range(BOARD_I)])
+    diag_x = And([step_vars[f'x_{i}_{BOARD_J - 1 - i}_{step}'] for i in range(BOARD_I)])
 
     row_o = Or([
-        And([final_step_vars[f'o_{i}_{j}_{STEPS - 1}'] for j in range(BOARD_J)]) for i in range(BOARD_I)
+        And([step_vars[f'o_{i}_{j}_{step}'] for j in range(BOARD_J)]) for i in range(BOARD_I)
     ])
     col_o = Or([
-        And([final_step_vars[f'o_{i}_{j}_{STEPS - 1}'] for i in range(BOARD_I)]) for j in range(BOARD_J)
+        And([step_vars[f'o_{i}_{j}_{step}'] for i in range(BOARD_I)]) for j in range(BOARD_J)
     ])
-    mdiag_o = And([final_step_vars[f'o_{i}_{i}_{STEPS - 1}'] for i in range(BOARD_I)])
-    diag_o = And([final_step_vars[f'o_{i}_{BOARD_J - 1 - i}_{STEPS - 1}'] for i in range(BOARD_I)])
+    mdiag_o = And([step_vars[f'o_{i}_{i}_{step}'] for i in range(BOARD_I)])
+    diag_o = And([step_vars[f'o_{i}_{BOARD_J - 1 - i}_{step}'] for i in range(BOARD_I)])
     
     win_x = Or(row_x, col_x, mdiag_x, diag_x)
     win_o = Or(row_o, col_o, mdiag_o, diag_o)
@@ -138,13 +138,16 @@ def check_wining_strategy(board, step):
         enc_prime = None
         for k in range(STEPS - 1, step + 1, -1):
             if k == 9:
-                enc_prime = Exists(list(all_vars[k].values()), And(generate_move_at_step('x', k - 1, all_vars[(k - 1):(k + 1)]), generate_wining_cond(all_vars[k])))
+                enc_prime = Exists(list(all_vars[k].values()), And(generate_move_at_step('x', k - 1, all_vars[(k - 1):(k + 1)]), generate_wining_cond(all_vars[k], k)))
             else:
                 if k % 2 == 0:
                     # Universal Quantifier
                     enc_prime = ForAll(list(all_vars[k].values()), Implies(generate_move_at_step('o', k - 1, all_vars[(k - 1):(k + 1)]), enc_prime))
                 else:
-                    enc_prime = Exists(list(all_vars[k].values()), And(generate_move_at_step('x', k-1, all_vars[(k - 1):(k + 1)]), enc_prime))
+                    if k >= 5:
+                        enc_prime = Exists(list(all_vars[k].values()), And(generate_move_at_step('x', k - 1, all_vars[(k - 1):(k + 1)]), Or(generate_wining_cond(all_vars[k], k), enc_prime)))
+                    else:
+                        enc_prime = Exists(list(all_vars[k].values()), And(generate_move_at_step('x', k - 1, all_vars[(k - 1):(k + 1)]), enc_prime))
         enc = And(enc, enc_prime)
 
     return enc
@@ -165,17 +168,37 @@ def get_move_from_model(model):
     # Unpack
     s0, s1 = states
     # Moves - Might be more than one, which counts as an error
-    # TODO: No need to check for O, since this is X's turn.
     moves = []
     for i in range(BOARD_I):
         for j in range(BOARD_J):
             x_cur = f'x_{i}_{j}_{s0}'
             x_nxt = f'x_{i}_{j}_{s1}'
-            o_cur = f'o_{i}_{j}_{s0}'
-            o_nxt = f'o_{i}_{j}_{s1}'
             if transition[x_cur] != transition[x_nxt]:
-                moves.append([x_cur, transition[x_cur], x_nxt, transition[x_nxt]])
-            if transition[o_cur] != transition[o_nxt]:
-                moves.append([o_cur, transition[o_cur], o_nxt, transition[o_nxt]])
-
+                moves.append((i, j))
+    assert len(moves) == 1, 'More than One valid move found - This might be an error!'
     return moves
+
+
+all_vars = []
+# TODO: We don't need all variables at this state. Delete those that are not used.
+for s in range(STEPS):
+    all_vars.append(generate_vars_at_step(s))
+
+
+board = [
+    ['x', ' ', ' '],
+    [' ', 'o', ' '],
+    ['o', ' ', 'x']
+]
+
+enc = check_wining_strategy(board, 4)
+
+s = Solver()
+
+s.add(enc)
+
+res = s.check()
+
+model = s.model()
+
+print(get_move_from_model(model))
