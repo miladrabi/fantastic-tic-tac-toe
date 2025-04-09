@@ -85,11 +85,15 @@ while(True):
                 cause.append(move)
             s.pop()
         if len(cause) == 1 :
-            print(f'Cuase of not Loosing is: {(cause[0][0]+1 , cause[0][1]+1)}, if you play counterfactual moves: \n\n')
+            print(f'Actual Cause of not Loosing is: {(cause[0][0]+1 , cause[0][1]+1)}, if you play counterfactual moves: \n\n')
             for i,cf in enumerate(countefactual):
                 print(f'{i+1} - Counterfactual move: {(cf[0][0]+1, cf[0][1]+1)} -> X has winning Startegy: {(cf[1][0]+1, cf[1][1]+1)} \n')
         elif len(cause) > 1:
-            print(f'Play : {[(c[0]+1 , c[1]+1) for c in cause]}, for not loosing (Not considered as cause) \n\n')
+            print(f'Disjunctive Actual Cause of not loosing are : {[(c[0]+1 , c[1]+1) for c in cause]}.\n\n')
+
+        else:
+            print(f'No Actual Cuase Found for not loosig.\n\n')
+
 
     move = input(f'\nYour move(Player {player.capitalize()}, Q to quit): ')
     if move in 'Qq':
