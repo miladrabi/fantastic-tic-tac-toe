@@ -22,7 +22,6 @@ s = Solver()
 
 state = 0
 while(True):
-    print(state)
     print_board(board)
     player = 'x' if state % 2 == 0 else 'o'
     if state % 2 == 0 and state != 0:
@@ -44,6 +43,7 @@ while(True):
     i, j = [int(v) for v in move]
     board[i - 1][j - 1] = player
     state += 1
-    if state > 9:
-        print('End of the game!')
+    if state >= 9:
+        print_board(board)
+        print('Game Over!')
         break

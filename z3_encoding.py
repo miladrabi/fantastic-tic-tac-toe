@@ -1,5 +1,8 @@
 from z3 import *
 
+# Option to force Z3's pretty printer print formulas in full
+set_option(max_args=100000000, max_lines=10000000, max_depth=100000000, max_visited=10000000)
+
 '''
 We assume X starts the game
 
@@ -57,9 +60,6 @@ def generate_move_at_step(player, step, bvars):
 
     return Or(const)
 
-
-
-# step must be one lower
 def generate_wining_cond(step_vars: list, step: int) -> BoolRef:
     global BOARD_I
     global BOARD_J
@@ -132,7 +132,7 @@ def check_wining_strategy(board, step):
 
     if step == 8:
         # Final Step, No need to use a quantifier
-        enc = And(enc, generate_wining_cond(all_vars[step + 1]))
+        enc = And(enc, generate_wining_cond(all_vars[step + 1], step + 1))
     else:
         # We are going to build the constraint for the next move of the opponent
         enc_prime = None
@@ -148,7 +148,8 @@ def check_wining_strategy(board, step):
                         enc_prime = Exists(list(all_vars[k].values()), And(generate_move_at_step('x', k - 1, all_vars[(k - 1):(k + 1)]), Or(generate_wining_cond(all_vars[k], k), enc_prime)))
                     else:
                         enc_prime = Exists(list(all_vars[k].values()), And(generate_move_at_step('x', k - 1, all_vars[(k - 1):(k + 1)]), enc_prime))
-        enc = And(enc, enc_prime)
+        # Either the current move is the wining move, or there exists a wining strategy.
+        enc = And(enc, Or(generate_wining_cond(all_vars[step + 1], step + 1), enc_prime))
 
     return enc
     
@@ -177,29 +178,3 @@ def get_move_from_model(model):
                 moves.append((i, j))
     assert len(moves) == 1, 'More than One valid move found - This might be an error!'
     return moves
-
-if __name__ == '__main__':
-
-    all_vars = []
-    # TODO: We don't need all variables at this state. Delete those that are not used.
-    for s in range(STEPS):
-        all_vars.append(generate_vars_at_step(s))
-
-
-    board = [
-        ['x', ' ', ' '],
-        [' ', 'o', ' '],
-        ['o', ' ', 'x']
-    ]
-
-    enc = check_wining_strategy(board, 4)
-
-    s = Solver()
-
-    s.add(enc)
-
-    res = s.check()
-
-    model = s.model()
-
-    print(get_move_from_model(model))
