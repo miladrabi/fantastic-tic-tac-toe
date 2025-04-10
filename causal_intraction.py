@@ -53,13 +53,35 @@ def suggestion(board):
             cause.append(move)
         s.pop()
     if len(cause) >0:
-        result = [tuple(x + 1 for x in tup) for tup in cause]
-        string = ''.join(str(t) for t in result)
-        return string
+        return cause
     else:
         string = "No suggestions Found!!"
         return string
+    
+def explain(board, row, column):
+    s = Solver()
+    available_cell = available_cells(board)
+    state = 9 - len(available_cell)
+    move = (row -1 , column -1)
+    if move not in available_cell:
+        print(f'Invalid move {move}')
+        return
+    print(f'Checking explain\n')
+    i, j = [int(v) for v in move]
+    tempboard = [row.copy() for row in board]
+    tempboard[i][j] = 'o'
+    enc = check_wining_strategy(tempboard, state+1)
+    s.push()
+    s.add(enc)
+    res = s.check()
+    if res == sat:
+        model = s.model()
+        sug_i, sug_j = get_move_from_model(model)[0]
+        return [(sug_i, sug_j)]
+    else:
+        return
 
+    
 
 
 if __name__ == "__main__":
