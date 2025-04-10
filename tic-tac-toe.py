@@ -67,11 +67,11 @@ class TicTacToeGUI(tk.Tk):
         super().__init__()
         self.title("Tic Tac Toe")
         self.configure(bg="white")
-        self.geometry("400x600")
+        self.geometry("1200x800")
         
         # Ask the player to choose X or O before starting.
         self.player_choice = self.ask_player_choice()
-        self.board = [[None for _ in range(3)] for _ in range(3)]
+        self.board = [[' ' for _ in range(3)] for _ in range(3)]
         
         # ----------------- Tic Tac Toe Board -----------------
         self.board_frame = tk.Frame(self, bg="white")
@@ -141,8 +141,8 @@ class TicTacToeGUI(tk.Tk):
                 self.destroy()
                 exit()
             answer = answer.strip().upper()
-            if answer in ('X', 'O'):
-                return answer
+            if answer in 'xoXO':
+                return answer.lower()
             else:
                 messagebox.showerror("Invalid Input", "Please enter X or O.", parent=self)
 
@@ -150,15 +150,13 @@ class TicTacToeGUI(tk.Tk):
         """Handle board button click."""
         btn = self.buttons[i][j]
         if btn.get_text() == "":
-            btn.set_text(self.player_choice)
+            current_symbol = self.player_choice
+            btn.set_text(current_symbol)
+            self.board[i][j] = current_symbol
+            self.player_choice = 'o' if current_symbol == 'x' else 'x'
             self.log_chat(f"Player clicked cell ({i}, {j}).")
-            self.process_move(i, j)
         else:
             self.log_chat(f"Cell ({i}, {j}) is already taken.")
-
-    def process_move(self, i, j):
-        """Placeholder for move processing (integrate your engine here)."""
-        print(f"Processing move for cell: ({i}, {j})")
 
     def send_chat_command(self):
         """Send the command entered in the chat input."""
@@ -170,7 +168,7 @@ class TicTacToeGUI(tk.Tk):
 
     def process_command(self, command):
         """Process chat commands."""
-        self.log_chat(f"Processed command: {command}")
+        self.log_chat(ask_ai(command, self.board))
 
     def log_chat(self, message):
         """Log a message in the chat log."""
