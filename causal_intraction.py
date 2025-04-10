@@ -53,7 +53,9 @@ def suggestion(board):
             cause.append(move)
         s.pop()
     if len(cause) >0:
-        return cause 
+        result = [tuple(x + 1 for x in tup) for tup in cause]
+        string = ''.join(str(t) for t in result)
+        return string
     else:
         string = "No suggestions Found!!"
         return string
@@ -64,7 +66,7 @@ if __name__ == "__main__":
     # Example usage
     board = [
         ['x', ' ', ' '],
-        [' ', ' ', ' '],
-        [' ', ' ', ' ']
+        [' ', 'o', ' '],
+        ['x', ' ', ' ']
     ]
-    suggestion(board)
+    print(suggestion(board))
