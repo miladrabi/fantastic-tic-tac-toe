@@ -116,7 +116,7 @@ class TicTacToeGUI(tk.Tk):
         self.chat_frame = tk.Frame(self, bg="white")
         self.chat_frame.pack(padx=10, pady=(20, 10), fill="both", expand=True)
         
-        chat_label = tk.Label(self.chat_frame, text="Chat / Commands", bg="white",
+        chat_label = tk.Label(self.chat_frame, text="Have a question? Ask me!", bg="white",
                               fg="black", font=("Helvetica", 16))
         chat_label.pack(pady=(10, 5), anchor="w", padx=10)
         
