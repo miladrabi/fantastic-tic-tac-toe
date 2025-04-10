@@ -91,4 +91,4 @@ if __name__ == "__main__":
         [' ', 'o', ' '],
         ['x', ' ', ' ']
     ]
-    print(suggestion(board))
+    print(explain(board, 1,3))
