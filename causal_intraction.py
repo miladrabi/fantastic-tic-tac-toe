@@ -31,9 +31,10 @@ def check_winner(board):
     return None
 
 
-def suggestion(board, state):
+def suggestion(board):
     s = Solver()
     available_cell = available_cells(board)
+    state = 9 - len(available_cell) 
     print(f'Available cells: {available_cell}')
     print(f'Checking Hints for player O to win ...\n')
     cause = list()
@@ -64,8 +65,8 @@ def suggestion(board, state):
 if __name__ == "__main__":
     # Example usage
     board = [
-        ['x', '', ' '],
+        ['x', ' ', ' '],
         [' ', ' ', ' '],
         [' ', ' ', ' ']
     ]
-    print(suggestion(board, 1))
+    suggestion(board)
