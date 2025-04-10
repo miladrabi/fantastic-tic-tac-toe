@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import simpledialog, messagebox, font
-from open_ai_test import *
+#from open_ai_test import *
 
 def create_rounded_rect(canvas, x1, y1, x2, y2, radius=25, **kwargs):
     """
@@ -49,7 +49,7 @@ class RoundedButton(tk.Canvas):
         # Bind click event
         self.bind("<Button-1>", self.on_click)
         # Also ensure clicks on drawn elements trigger the event
-        self.tag_bind(self.round_rect, "<Button-1>", self.on_click)
+        # self.tag_bind(self.round_rect, "<Button-1>", self.on_click)
         self.tag_bind(self.text_item, "<Button-1>", self.on_click)
 
     def on_click(self, event):
@@ -92,13 +92,25 @@ class TicTacToeGUI(tk.Tk):
                                     text="",
                                     font_spec=("Helvetica", 30, "bold"),
                                     command=lambda i=i, j=j: self.cell_clicked(i, j))
-                btn.grid(row=i, column=j, padx=0, pady=0)
+                btn.grid(row=i, column=j, padx=5, pady=5)
                 self.buttons[i][j] = btn
                 
         # Ensure the grid cells expand evenly if the frame is resized.
         for i in range(3):
             self.board_frame.grid_rowconfigure(i, weight=1)
             self.board_frame.grid_columnconfigure(i, weight=1)
+
+        # ------------- Reset Button -------------
+        reset_btn = RoundedButton(self,
+                                  width=150,
+                                  height=50,
+                                  radius=20,
+                                  bg_color="#27AE60",
+                                  fg_color="white",
+                                  text="Reset Game",
+                                  font_spec=("Helvetica", 14, "bold"),
+                                  command=self.reset_game)
+        reset_btn.pack(pady=(10, 20))
 
         # ----------------- Chat Area -----------------
         self.chat_frame = tk.Frame(self, bg="white")
@@ -154,7 +166,6 @@ class TicTacToeGUI(tk.Tk):
             btn.set_text(current_symbol)
             self.board[i][j] = current_symbol
             self.player_choice = 'o' if current_symbol == 'x' else 'x'
-            self.log_chat(f"Player clicked cell ({i}, {j}).")
         else:
             self.log_chat(f"Cell ({i}, {j}) is already taken.")
 
@@ -162,13 +173,12 @@ class TicTacToeGUI(tk.Tk):
         """Send the command entered in the chat input."""
         command = self.chat_entry.get().strip()
         if command:
-            self.log_chat(f"Command: {command}")
             self.process_command(command)
             self.chat_entry.delete(0, tk.END)
 
     def process_command(self, command):
         """Process chat commands."""
-        self.log_chat(ask_ai(command, self.board))
+        #self.log_chat(ask_ai(command, self.board))
 
     def log_chat(self, message):
         """Log a message in the chat log."""
@@ -176,6 +186,25 @@ class TicTacToeGUI(tk.Tk):
         self.chat_log.insert(tk.END, message + "\n")
         self.chat_log.config(state="disabled")
         self.chat_log.see(tk.END)
+
+    def reset_game(self):
+        """Reset the board and optionally choose side again."""
+        answer = messagebox.askyesno("Reset Game", "Do you want to choose X or O again?")
+        if answer:
+            self.player_choice = self.ask_player_choice()
+        
+        # Clear all buttons
+        for i in range(3):
+            for j in range(3):
+                self.buttons[i][j].set_text("")
+
+        # Clear the board
+        self.board = [[' ' for _ in range(3)] for _ in range(3)]
+
+        self.log_chat('#' * 100)
+        self.log_chat("Game reset.")
+        self.log_chat('#' * 100)
+
 
 
 app = TicTacToeGUI()
