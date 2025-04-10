@@ -48,9 +48,7 @@ def suggestion(board):
         s.add(enc)
         res = s.check()
         if res == sat:
-            model = s.model()
-            sug_i, sug_j = get_move_from_model(model)[0]
-            countefactual.append([move,(sug_i, sug_j)])
+            pass
         else:
             cause.append(move)
         s.pop()
