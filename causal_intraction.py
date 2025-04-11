@@ -69,16 +69,3 @@ def explain(board, pos):
         return [(sug_i, sug_j)]
     else:
         return []
-
-    
-
-
-if __name__ == "__main__":
-    # Example usage
-    board = [
-        ['x', ' ', ' '],
-        [' ', 'o', ' '],
-        ['x', ' ', ' ']
-    ]
-    print(explain(board, (1,3)))
-    print(suggestion(board))
