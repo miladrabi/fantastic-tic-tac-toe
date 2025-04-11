@@ -122,7 +122,7 @@ class TicTacToeGUI(tk.Tk):
         
         # Chat log with a light green background (or any color you prefer)
         self.chat_log = tk.Text(self.chat_frame, height=10, bg="#E8F8F2", fg="black",
-                                font=("Helvetica", 12), wrap="word", bd=0, relief="flat")
+                                font=("Helvetica", 16), wrap="word", bd=0, relief="flat")
         self.chat_log.config(state="disabled")
         self.chat_log.pack(padx=10, pady=5, fill="both", expand=True)
         
@@ -178,7 +178,8 @@ class TicTacToeGUI(tk.Tk):
 
     def process_command(self, command):
         """Process chat commands."""
-        #self.log_chat(ask_ai(command, self.board))
+        self.log_chat('User: %s' % command)
+        self.log_chat('Response %s' % ask_ai(command, self.board))
 
     def log_chat(self, message):
         """Log a message in the chat log."""

@@ -64,7 +64,9 @@ no_move_suggestions = [
 
 def generate_explanation_for(board, pos):
     potential_moves = explain(board, pos)
-    print('Eexplained: ', potential_moves)
+    if potential_moves == -1:
+        position = position_encodings[move[0]][move[1]]
+        return '%s is not a valid move. Try a different move.' % position
     rand_idx = randint(0, len(free_moves_suggestions) - 1)
 
     if not potential_moves:
@@ -76,7 +78,6 @@ def generate_explanation_for(board, pos):
 
 def generate_suggestion_for(board):
     sug_moves = suggestion(board)
-    print('Suggested: ', sug_moves)
     rand_idx = randint(0, len(free_moves_suggestions) - 1)
 
     if not sug_moves:
@@ -94,14 +95,3 @@ def generate_suggestion_for(board):
         s = positions[0]
 
     return suggestion_templates[rand_idx] % s
-
-
-if __name__ == "__main__":
-    # Example usage
-    board = [
-        ['x', ' ', ' '],
-        [' ', ' ', ' '],
-        [' ', ' ', ' ']
-    ]
-    print(generate_explanation_for(board, (2, 1)))
-    print(generate_suggestion_for(board))

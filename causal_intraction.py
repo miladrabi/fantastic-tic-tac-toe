@@ -55,7 +55,7 @@ def explain(board, pos):
     move = (row -1 , column -1)
     if move not in available_cell:
         # Empty list indicates no suggestion, or an invalid move
-        return []
+        return -1
     i, j = [int(v) for v in move]
     tempboard = [row.copy() for row in board]
     tempboard[i][j] = 'o'
