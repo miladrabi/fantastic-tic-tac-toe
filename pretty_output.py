@@ -65,8 +65,8 @@ no_move_suggestions = [
 def generate_explanation_for(board, pos):
     potential_moves = explain(board, pos)
     if potential_moves == -1:
-        position = position_encodings[move[0]][move[1]]
-        return '%s is not a valid move. Try a different move.' % position
+        position = position_encodings[pos[0] - 1][pos[1] - 1]
+        return '%s is an invalid move! Why don\'t you choose another position?' % position
     rand_idx = randint(0, len(free_moves_suggestions) - 1)
 
     if not potential_moves:
@@ -78,6 +78,7 @@ def generate_explanation_for(board, pos):
 
 def generate_suggestion_for(board):
     sug_moves = suggestion(board)
+
     rand_idx = randint(0, len(free_moves_suggestions) - 1)
 
     if not sug_moves:
