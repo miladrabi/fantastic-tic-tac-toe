@@ -1,18 +1,25 @@
 from openai import OpenAI
 import os
 import json
-def ask_ai(prompt):
+import pretty_output
+
+def ask_ai(prompt, board_pos):
     key = os.environ.get("OPENAI_API_KEY")
     client = OpenAI(api_key=key)
 
     def solve(location_row, location_col):
-        print(f"Executing move: {location_row}, {location_col}")
-        return f"Move executed at {location_row}, {location_col}"
+        return pretty_output.generate_explanation_for(board_pos, (location_row, location_col))
 
     def next_move():
-        print("Calculating the next move recommendation.")
-        recommendation = "Consider placing your piece in the top-left corner."
-        return recommendation
+        return pretty_output.generate_suggestion_for(board_pos)
+    
+    def compare_moves(moves):
+        print ("Comparing moves...")
+        for move in moves:
+            location_row = move.get("location_row")
+            location_col = move.get("location_col")
+            print(f"Move: ({location_row}, {location_col})")
+        return "Moves compared successfully."
 
     def call_function(name, args):
         if name == "next_move":
@@ -21,9 +28,12 @@ def ask_ai(prompt):
             location_row = args.get("location_row")
             location_col = args.get("location_col")
             return solve(location_row, location_col)
+        elif name == "compare_moves":
+            moves = args.get("moves")
+            return compare_moves(moves)
 
     messages = [
-        {"role": "system", "content": "You simply need to extract the row and column from the user message for only 'what if ' moves and not 'instead of <location>' in tic-tac-toe and call the solver function, where top-middle is 1,2, or if the user wants help, call next_move."},
+        {"role": "system", "content": "You simply need to extract the row and column from the user message for only 'what if?' moves and not 'instead of <location>' in tic-tac-toe and call the solver function, where top-middle is 1,2, or if the user wants help, call next_move. Also "},
         {"role": "user", "content": prompt}
     ]
 
@@ -53,6 +63,37 @@ def ask_ai(prompt):
             "name": "next_move",
             "description": "Suggest to the play which move to play next.",
             "parameters": None
+        },
+        {
+            "type": "function",
+            "name": "compare_moves",
+            "description": "Compare two or more moves on the tic tac toe board and determine the best move, even comparing each spot in a row or column if requested.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "moves": {
+                        "type": "array",
+                        "description": "The moves to compare.",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "location_row": {
+                                    "type": "integer",
+                                    "description": "The board row location of the move (1-3 where 1 is the top row and 3 is the bottom row)"
+                                },
+                                "location_col": {
+                                    "type": "integer",
+                                    "description": "The board column location of the move (1-3 where 1 is the left column and 3 is the right column)"
+                                }
+                            },
+                            "required": ["location_row", "location_col"],
+                            "additionalProperties": False
+                        }
+                    }
+                },
+            "required": ["moves"],
+            "additionalProperties": False
+        }
         }
     ]
 
@@ -78,6 +119,6 @@ def ask_ai(prompt):
     
 if __name__ == "__main__":
     # Example usage
-    prompt = "What would happen if I place my move in the bottom-right corner instead?"
-    result = ask_ai(prompt)
+    prompt = "Is move (1,2) better than any move in the right column?"
+    result = ask_ai(prompt, [])
     print(result)  
