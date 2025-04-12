@@ -28,7 +28,11 @@ class RoundedButton(tk.Canvas):
                  fg_color="white",    # White text
                  text="",
                  font_spec=("Helvetica", 20, "bold"),
-                 command=None, **kwargs):
+                 command=None,
+                 state=0,
+                 state_font=("Helvetica", 10),
+                 state_color="gray",
+                 **kwargs):
         # Set the border to 0 and background same as parent's bg
         tk.Canvas.__init__(self, master, width=width, height=height, bg=master["bg"],
                            highlightthickness=0, bd=0, **kwargs)
@@ -46,11 +50,30 @@ class RoundedButton(tk.Canvas):
         # Create text in the center
         self.text_item = self.create_text(width//2, height//2, text=text,
                                           fill=fg_color, font=font_spec)
+        
+        # If a state value is provided, display it in bottom right.
+        if state is not None:
+            self.state_item = self.create_text(width - 10, height - 10,
+                                               text=str(state),
+                                               fill=state_color,
+                                               font=state_font,
+                                               anchor="se")
+        else:
+            self.state_item = None
+
         # Bind click event
         self.bind("<Button-1>", self.on_click)
         # Also ensure clicks on drawn elements trigger the event
         # self.tag_bind(self.round_rect, "<Button-1>", self.on_click)
         self.tag_bind(self.text_item, "<Button-1>", self.on_click)
+        
+        if self.state_item:
+            self.tag_bind(self.state_item, "<Button-1>", self.on_click)
+
+    # Marks the state at the bottom right of each cell
+    def set_state(self, new_state):
+        if self.state_item is not None:
+            self.itemconfigure(self.state_item, text=str(new_state))
 
     def on_click(self, event):
         if self.command:
@@ -73,6 +96,9 @@ class TicTacToeGUI(tk.Tk):
         self.player_choice = self.ask_player_choice()
         self.board = [[' ' for _ in range(3)] for _ in range(3)]
         
+        # state of the game
+        self.state = 0
+        
         # ----------------- Tic Tac Toe Board -----------------
         self.board_frame = tk.Frame(self, bg="white")
         self.board_frame.pack(pady=10)
@@ -91,7 +117,8 @@ class TicTacToeGUI(tk.Tk):
                                     fg_color="white",
                                     text="",
                                     font_spec=("Helvetica", 30, "bold"),
-                                    command=lambda i=i, j=j: self.cell_clicked(i, j))
+                                    command=lambda i=i, j=j: self.cell_clicked(i, j),
+                                    state=0)
                 btn.grid(row=i, column=j, padx=5, pady=5)
                 self.buttons[i][j] = btn
                 
@@ -164,8 +191,11 @@ class TicTacToeGUI(tk.Tk):
         if btn.get_text() == "":
             current_symbol = self.player_choice
             btn.set_text(current_symbol)
+            btn.set_state(self.state)
             self.board[i][j] = current_symbol
             self.player_choice = 'o' if current_symbol == 'x' else 'x'
+            # Increment the state
+            self.state += 1
         else:
             self.log_chat(f"Cell ({i}, {j}) is already taken.")
 
